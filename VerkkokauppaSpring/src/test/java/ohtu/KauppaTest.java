@@ -80,4 +80,64 @@ public class KauppaTest {
         
         verify(pankki).tilisiirto(eq("pekka"), anyInt(), eq("12345"), anyString(), eq(5));
     }
+    
+    @Test
+    public void aloitaAsioitinNollaaEdellisenOstoskorinTiedot() {
+        when(varasto.saldo(1)).thenReturn(10);
+        when(varasto.haeTuote(1)).thenReturn(new Tuote(1, "maito", 5));
+        
+        kauppa.aloitaAsiointi();
+        kauppa.lisaaKoriin(1);
+        kauppa.tilimaksu("pekka", "12345");
+        
+        verify(pankki).tilisiirto(eq("pekka"), anyInt(), eq("12345"), anyString(), eq(5));
+        
+        kauppa.aloitaAsiointi();
+        kauppa.lisaaKoriin(1);
+        kauppa.lisaaKoriin(1);
+        kauppa.tilimaksu("pekka", "12345");
+        
+        verify(pankki).tilisiirto(eq("pekka"), anyInt(), eq("12345"), anyString(), eq(10));
+    }
+    
+    @Test
+    public void kauppaPyytaaAinaUuttaViitenumeroaMaksutapahtumille() {
+        when(viitegen.uusi()).thenReturn(1).thenReturn(2).thenReturn(3);
+        
+        when(varasto.saldo(1)).thenReturn(10);
+        when(varasto.haeTuote(1)).thenReturn(new Tuote(1, "maito", 5));
+        
+        kauppa.aloitaAsiointi();
+        kauppa.lisaaKoriin(1);
+        kauppa.tilimaksu("pekka", "12345");
+        
+        verify(viitegen, times(1)).uusi();
+        
+        kauppa.aloitaAsiointi();
+        kauppa.lisaaKoriin(1);
+        kauppa.tilimaksu("pekka", "123456");
+        
+        verify(viitegen, times(2)).uusi();
+        
+        kauppa.aloitaAsiointi();
+        kauppa.lisaaKoriin(1);
+        kauppa.tilimaksu("pekka", "123456");
+        
+        verify(viitegen, times(3)).uusi();
+    }
+    
+    @Test
+    public void ostoskoristaPoistoPoistaaTuotteenJaPalauttaaSenVarastoon() {
+        when(varasto.saldo(1)).thenReturn(10);
+        when(varasto.haeTuote(1)).thenReturn(new Tuote(1, "maito", 5));
+        
+        kauppa.aloitaAsiointi();
+        kauppa.lisaaKoriin(1);
+        kauppa.lisaaKoriin(1);
+        kauppa.poistaKorista(1);
+        kauppa.tilimaksu("pekka", "12345");
+        
+        verify(varasto, times(1)).palautaVarastoon(new Tuote(1, "maito", 5));
+        verify(pankki).tilisiirto(anyString(), anyInt(), anyString(), anyString(), eq(5));
+    }
 }
