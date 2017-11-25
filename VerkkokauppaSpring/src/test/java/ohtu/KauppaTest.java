@@ -28,8 +28,6 @@ public class KauppaTest {
     
     @Test
     public void ostoksenPaatyttyaPankinMetodiaTilisiirtoKutsutaanOikeillaArvoilla() {
-        when(viitegen.uusi()).thenReturn(42);
-        
         when(varasto.saldo(1)).thenReturn(10);
         when(varasto.haeTuote(1)).thenReturn(new Tuote(1, "maito", 5));
         
@@ -38,13 +36,11 @@ public class KauppaTest {
         kauppa.lisaaKoriin(1);
         kauppa.tilimaksu("pekka", "12345");
         
-        verify(pankki).tilisiirto("pekka", 42, "12345", "33333-44455", 5);
+        verify(pankki).tilisiirto(eq("pekka"), anyInt(), eq("12345"), anyString(), eq(5));
     }
     
     @Test
     public void ostettaessaKaksiEriTuotettaPankinMetodiaTilisiirtoKutsutaanOikein() {
-        when(viitegen.uusi()).thenReturn(42);
-        
         when(varasto.saldo(1)).thenReturn(10);
         when(varasto.haeTuote(1)).thenReturn(new Tuote(1, "maito", 5));
         when(varasto.saldo(2)).thenReturn(8);
@@ -55,13 +51,11 @@ public class KauppaTest {
         kauppa.lisaaKoriin(2);
         kauppa.tilimaksu("pekka", "12345");
         
-        verify(pankki).tilisiirto("pekka", 42, "12345", "33333-44455", 9);
+        verify(pankki).tilisiirto(eq("pekka"), anyInt(), eq("12345"), anyString(), eq(9));;
     }
     
     @Test
     public void ostettaessaKaksiSamaaTuotettaPankinMetodiaTilisiirtoKutsutaanOikein() {
-        when(viitegen.uusi()).thenReturn(42);
-        
         when(varasto.saldo(1)).thenReturn(10);
         when(varasto.haeTuote(1)).thenReturn(new Tuote(1, "maito", 5));
         
@@ -70,13 +64,11 @@ public class KauppaTest {
         kauppa.lisaaKoriin(1);
         kauppa.tilimaksu("pekka", "12345");
         
-        verify(pankki).tilisiirto("pekka", 42, "12345", "33333-44455", 10);
+        verify(pankki).tilisiirto(eq("pekka"), anyInt(), eq("12345"), anyString(), eq(10));
     }
     
     @Test
     public void ostettaessaKaksiEriTuotettaJoistaToinenOnLoppuPankinMetodiaTilisiirtoKutsutaanOikein() {
-        when(viitegen.uusi()).thenReturn(42);
-        
         when(varasto.saldo(1)).thenReturn(10);
         when(varasto.haeTuote(1)).thenReturn(new Tuote(1, "maito", 5));
         when(varasto.saldo(2)).thenReturn(0);
@@ -86,6 +78,6 @@ public class KauppaTest {
         kauppa.lisaaKoriin(2);
         kauppa.tilimaksu("pekka", "12345");
         
-        verify(pankki).tilisiirto("pekka", 42, "12345", "33333-44455", 5);
+        verify(pankki).tilisiirto(eq("pekka"), anyInt(), eq("12345"), anyString(), eq(5));
     }
 }
